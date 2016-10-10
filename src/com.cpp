@@ -15,10 +15,8 @@ boolean gConnected = false;
 char gSerialInput[IN_BUFFER_LENGTH];
 int gBufferLength;
 char *gMessageType;
-char *gFrom;
-char *gTo;
-char *gCommand;
-char *gValue;
+char *gTopic;
+char *gPayload;
 
 void setupCom() {
 	Serial.begin(9600);
@@ -26,6 +24,7 @@ void setupCom() {
 }
 
 void sendHelloAndCheckAnswer() {
+	debug("sending HELLO to tcpardu...");
 	Serial.print("HELLO\n");
 	int numRead = readSerialStringToBuffer();
 	if (numRead > 0) {
@@ -36,6 +35,7 @@ void sendHelloAndCheckAnswer() {
 int readSerialStringToBuffer() {
 	while (Serial.available() > 0) {
 		if (gBufferLength + 1 == IN_BUFFER_LENGTH) {
+			// overflow
 			break;
 		}
 		gSerialInput[gBufferLength] = Serial.read();
@@ -47,16 +47,16 @@ int readSerialStringToBuffer() {
 	if (gSerialInput[gBufferLength] == MESSAGE_SEPARATOR_CHAR) {
 		gSerialInput[gBufferLength] = 0;
 		if (gBufferLength > 0) {
-			debugStr("Unparsed message: ", gSerialInput);
+			debugStr("Received raw message before parsing: ", gSerialInput);
+			debugInt("Raw message length is ", gBufferLength);
 
 			parseReceivedBufferToParts();
 			char spfBuffer[200];
 			sprintf(spfBuffer,
-					"%s received message type [%s] from [%s] to [%s] code [%s] value [%s].",
+					"%s received message type [%s] topic [%s] payload [%s].",
 					WHOAMI, gMessageType == NULL ? "" : gMessageType,
-					gFrom == NULL ? "" : gFrom, gTo == NULL ? "" : gTo,
-					gCommand == NULL ? "" : gCommand,
-					gValue == NULL ? "" : gValue);
+					gTopic == NULL ? "" : gTopic,
+					gPayload == NULL ? "" : gPayload);
 			debug(spfBuffer);
 		}
 		int readBytes = gBufferLength;
@@ -68,24 +68,18 @@ int readSerialStringToBuffer() {
 
 void parseReceivedBufferToParts() {
 	gMessageType = NULL;
-	gFrom = NULL;
-	gTo = NULL;
-	gCommand = NULL;
-	gValue = NULL;
+	gTopic = NULL;
+	gPayload = NULL;
 	int i = 0;
-	for (int part = 0; part < 5; part++) {
+	for (int part = 0; part < 3; part++) {
 		if (gSerialInput[i] == 0)
 			return;
 		if (part == 0) {
 			gMessageType = gSerialInput;
 		} else if (part == 1) {
-			gFrom = gSerialInput + i;
+			gTopic = gSerialInput + i;
 		} else if (part == 2) {
-			gTo = gSerialInput + i;
-		} else if (part == 3) {
-			gCommand = gSerialInput + i;
-		} else if (part == 4) {
-			gValue = gSerialInput + i;
+			gPayload = gSerialInput + i;
 		}
 		while (gSerialInput[i] != 0) {
 			if (gSerialInput[i] == ':') {
@@ -101,18 +95,42 @@ void parseReceivedBufferToParts() {
 void checkHelloAnswer() {
 	if (compareStr("OLLEH", gMessageType)) {
 		gConnected = true;
-		debug(WHOAMI);
+		debugStr(
+				"ARDUINO got valid TcpArdu response, sending subscribe request. The arduino is ",
+				WHOAMI);
 		doubleBeep();
 		orderMessages();
 	}
 }
 
-boolean compareReceivedTo(char *arg) {
-	return compareStr(arg, gTo);
+boolean compareReceivedTopic(char *arg) {
+	return compareStr(arg, gTopic);
 }
 
-boolean compareReceivedCommand(char *arg) {
-	return compareStr(arg, gCommand);
+boolean compareReceivedPayload(char *arg) {
+	return compareStr(arg, gPayload);
+}
+
+boolean isTwoPartsPayload(char *firstPart, char *secondPart) {
+	int i = 0;
+	int secondPartIndex = 0;
+	while (gPayload[i] != 0 && i < IN_BUFFER_LENGTH) {
+		if (gPayload[i] == ':') {
+			if (secondPartIndex > 0) {
+				return 0;
+			}
+			secondPartIndex = ++i + 1;
+		}
+		i++;
+	}
+	if (secondPartIndex > 0) {
+		strncpy(firstPart, gPayload, secondPartIndex);
+		firstPart[secondPartIndex - 1] = 0;
+		strcpy(secondPart, gPayload + secondPartIndex);
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 boolean compareStr(char *str1, char *str2) {
@@ -127,56 +145,50 @@ boolean compareStr(char *str1, char *str2) {
 }
 
 void orderMessages() {
-	Serial.print("CMD:");
-	Serial.print(WHOAMI);
-	Serial.print(":MASTER:ORDER_COMMAND_FOR");
-	for (int i = 0; i < NUMBER_OF_UNITS; i++) {
-		Serial.print(":");
-		Serial.print(getUnitName(i));
-	}
+	Serial.print("MS:");
+	Serial.print(SUBSCRIBE_TOPIC);
 	Serial.print("\n");
 }
 
 void checkAndProcessMessage() {
 	int numRead = readSerialStringToBuffer();
-	if (numRead
-			> 0&& gMessageType != NULL && gFrom != NULL && gTo != NULL && gCommand != NULL) {
-		if (compareStr("CMD", gMessageType)) {
+	if (numRead > 0 && gMessageType != NULL && gTopic != NULL
+			&& gPayload != NULL) {
+		if (compareStr("MM", gMessageType)) {
 			processCommand();
-		} else if (compareStr("STS", gMessageType)) {
-			processStatus();
 		} else {
 			debug("Wrong message");
 		}
 	}
 }
 
-void sendStatusInt(char* unit, int value) {
-	Serial.print("STS:");
-	Serial.print(unit);
-	Serial.print("::");
+void sendMessageInt(char* topic, int value) {
+	Serial.print("MP:");
+	Serial.print(topic);
+	Serial.print(":");
 	Serial.println(value);
 }
 
-void sendStatusIntInt(char* unit, int value1, int value2) {
-	Serial.print("STS:");
-	Serial.print(unit);
-	Serial.print("::");
+void sendMessageIntInt(char* topic, int value1, int value2) {
+	Serial.print("MP:");
+	Serial.print(topic);
+	Serial.print(":");
 	Serial.print(value1);
 	Serial.print(":");
 	Serial.println(value2);
 }
 
-void sendStatusString(char* unit, char* value) {
-	Serial.print(unit);
-	Serial.print(':');
+void sendMessageString(char* topic, char* value) {
+	Serial.print("MP:");
+	Serial.print(topic);
+	Serial.print(":");
 	Serial.println(value);
-}
-
-char *getComValue() {
-	return gValue;
 }
 
 boolean isConnected() {
 	return gConnected;
+}
+
+char *getPayload() {
+	return gPayload;
 }

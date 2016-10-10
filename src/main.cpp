@@ -42,7 +42,7 @@ void loop() {
 
 void processCommand() {
 	for (int i = 0; i < NUMBER_OF_UNITS; i++) {
-		if (compareReceivedTo(cUnits[i])) {
+		if (compareReceivedTopic(cUnits[i])) {
 			switch (i) {
 			case UNIT_INDEX_DOOR:
 				processDoorCommand();

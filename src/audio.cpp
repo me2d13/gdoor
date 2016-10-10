@@ -25,9 +25,9 @@ void setupAudio() {
 }
 
 void processAudioCommand() {
-	  if (compareReceivedCommand("BEEP")) {
+	  if (compareReceivedTopic("BEEP")) {
 	    beep();
-	  } else if (compareReceivedCommand("DOUBLEBEEP")) {
+	  } else if (compareReceivedTopic("DOUBLEBEEP")) {
 		  doubleBeep();
 	  } else {
 	    debug("Unknown audio command");

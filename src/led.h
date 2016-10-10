@@ -9,7 +9,7 @@
 #define SRC_LED_H_
 
 #define LEDPIN 5
-#define LED_CEIL_UNIT_NAME "GA0LEDCEIL"
+#define LED_CEIL_UNIT_NAME "/garage/ard1/cmd/led"
 
 #define LED_STEP 5
 

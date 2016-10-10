@@ -8,18 +8,18 @@
 #include "Arduino.h"
 
 void debug(char *arg) {
-  Serial.print("DEBUG:");
+  Serial.print("GDOOR DEBUG:");
   Serial.println(arg);
 }
 
 void debugInt(char *arg, int value) {
-  Serial.print("DEBUG:");
+  Serial.print("GDOOR DEBUG:");
   Serial.print(arg);
   Serial.println(value);
 }
 
 void debugStr(char *arg, char *value) {
-	  Serial.print("DEBUG:");
+	  Serial.print("GDOOR DEBUG:");
 	  Serial.print(arg);
 	  Serial.println(value);
 	}

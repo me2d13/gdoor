@@ -23,7 +23,7 @@ void setupDoor() {
 }
 
 void processDoorCommand() {
-	  if (compareReceivedCommand("PUSH")) {
+	  if (compareReceivedTopic("PUSH")) {
 		  pushGarageDoorButton();
 	  } else {
 	    debug("Unknown DOOR command (use PUSH)");
@@ -45,7 +45,7 @@ void tickDoors() {
 		gHallClosed = lHallClosed;
 		gHallOpen = lHallOpen;
 		int status = (gHallOpen ? 1 : 0) + (gHallClosed ? 2 : 0);
-		sendStatusInt(GDOOR_UNIT_NAME, status);
+		sendMessageInt(GDOOR_UNIT_NAME, status);
 	}
 	if (gButtonDownTime != 0 && gButtonDownTime + PUSH_MS < millis()) {
 		digitalWrite(GDOORPIN, HIGH);
