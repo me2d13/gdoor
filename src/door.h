@@ -12,7 +12,9 @@
 #define HALLPINOPEN 2
 #define HALLPINCLOSED 3
 
-#define GDOOR_UNIT_NAME "GA0DOOR"
+#define GDOOR_COMMAND_TOPIC "/garage/ard1/command/door"
+#define GDOOR_STATUS_TOPIC "/garage/ard1/status/door"
+
 
 #define PUSH_MS 400
 

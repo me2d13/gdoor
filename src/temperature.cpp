@@ -59,7 +59,7 @@ void readTemperature()
     		  temperature/10, abs(temperature%10),
 			  humidity/10, humidity%10);
       debug(buf);
-      sendMessageIntInt(TEMPERATURE_UNIT_NAME, temperature, humidity);
+      sendMessageIntInt(TEMPERATURE_STATUS_TOPIC, temperature, humidity);
       break;
     case DHT_ERROR_CHECKSUM:
       debug("Temperature checksum error");
@@ -91,7 +91,7 @@ void readTemperature()
 }
 
 void processTemperature() {
-	  if (compareReceivedTopic("GET")) {
+	  if (compareReceivedPayload("get")) {
 		  readTemperature();
 	  } else {
 	    debug("Unknown TEMPERATURE command (use GET)");

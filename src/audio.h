@@ -13,7 +13,8 @@
 
 #define BEEP_LENGTH_MS 50
 
-#define AUDIO_UNIT_NAME "GA0AUDIO"
+#define AUDIO_COMMAND_TOPIC "/garage/ard1/command/audio"
+
 
 void setupAudio();
 void processAudioCommand();

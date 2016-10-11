@@ -9,7 +9,9 @@
 #define SRC_TEMPERATURE_H_
 
 #define DHT22_PIN 4
-#define TEMPERATURE_UNIT_NAME "GA0TEMPERATURE"
+#define TEMPERATURE_COMMAND_TOPIC "/garage/ard1/command/temperature"
+#define TEMPERATURE_STATUS_TOPIC "/garage/ard1/status/temperature"
+
 
 void processTemperature();
 void setupTemperature();

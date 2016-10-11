@@ -81,8 +81,8 @@ void parseReceivedBufferToParts() {
 		} else if (part == 2) {
 			gPayload = gSerialInput + i;
 		}
-		while (gSerialInput[i] != 0) {
-			if (gSerialInput[i] == ':') {
+		while (gSerialInput[i] != 0 && i < IN_BUFFER_LENGTH) {
+			if (gSerialInput[i] == ':' && part < 2) {
 				gSerialInput[i] = 0;
 				i++;
 				break;
@@ -125,8 +125,10 @@ boolean isTwoPartsPayload(char *firstPart, char *secondPart) {
 	}
 	if (secondPartIndex > 0) {
 		strncpy(firstPart, gPayload, secondPartIndex);
-		firstPart[secondPartIndex - 1] = 0;
-		strcpy(secondPart, gPayload + secondPartIndex);
+		firstPart[secondPartIndex - 2] = 0;
+		strcpy(secondPart, gPayload + secondPartIndex - 1);
+		//debugStr("1st part ", firstPart);
+		//debugStr("2nd part ", secondPart);
 		return 1;
 	} else {
 		return 0;

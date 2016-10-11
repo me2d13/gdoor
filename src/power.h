@@ -9,7 +9,9 @@
 #define SRC_POWER_H_
 
 #define AC_POWER_PIN 7
-#define AC_POWER_UNIT_NAME "GA0ACPOWER"
+#define AC_POWER_COMMAND_TOPIC "/garage/ard1/command/acpower"
+#define AC_POWER_STATUS_TOPIC "/garage/ard1/status/acpower"
+
 
 void tickPower();
 void processPowerCommand();

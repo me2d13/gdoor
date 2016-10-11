@@ -17,10 +17,10 @@ void tickPower(short explicitSend) {
 	if (lPowerStatus != gPowerStatus) {
 		gPowerStatus = lPowerStatus;
 		debugInt("AC power changed to ", lPowerStatus);
-		sendMessageInt(AC_POWER_UNIT_NAME, gPowerStatus);
+		sendMessageInt(AC_POWER_STATUS_TOPIC, gPowerStatus);
 	} else {
 		if (explicitSend) {
-			sendMessageInt(AC_POWER_UNIT_NAME, gPowerStatus);
+			sendMessageInt(AC_POWER_STATUS_TOPIC, gPowerStatus);
 		}
 	}
 }
@@ -30,7 +30,7 @@ void tickPower() {
 }
 
 void processPowerCommand() {
-	if (compareReceivedTopic("GET")) {
+	if (compareReceivedPayload("get")) {
 		tickPower(1);
 	} else {
 		debug("Unknown POWER command (use GET)");

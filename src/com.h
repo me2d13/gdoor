@@ -12,7 +12,7 @@
 #define IN_BUFFER_LENGTH 50
 
 #define WHOAMI "GDOOR"
-#define SUBSCRIBE_TOPIC "/garage/ard1/cmd/#"
+#define SUBSCRIBE_TOPIC "/garage/ard1/command/#"
 
 #define MESSAGE_SEPARATOR_CHAR 30
 
