@@ -59,7 +59,10 @@ void readTemperature()
     		  temperature/10, abs(temperature%10),
 			  humidity/10, humidity%10);
       debug(buf);
-      sendMessageIntInt(TEMPERATURE_STATUS_TOPIC, temperature, humidity);
+      sprintf(buf, "%hi.%01hi", temperature/10, abs(temperature%10));
+      sendMessageString(TEMPERATURE_STATUS_TOPIC, buf);
+      sprintf(buf, "%i.%01i", humidity/10, humidity%10);
+      sendMessageString(TEMPERATURE_STATUS_HUMIDITY, buf);
       break;
     case DHT_ERROR_CHECKSUM:
       debug("Temperature checksum error");

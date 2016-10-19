@@ -11,6 +11,7 @@
 #define DHT22_PIN 4
 #define TEMPERATURE_COMMAND_TOPIC "/garage/ard1/command/temperature"
 #define TEMPERATURE_STATUS_TOPIC "/garage/ard1/status/temperature"
+#define TEMPERATURE_STATUS_HUMIDITY "/garage/ard1/status/humidity"
 
 
 void processTemperature();
