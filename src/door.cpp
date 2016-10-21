@@ -10,8 +10,8 @@
 #include "log.h"
 #include "com.h"
 
-int gHallOpen = LOW;
-int gHallClosed = LOW;
+int gHallOpen = HIGH; // high means no magnetic field
+int gHallClosed = HIGH;
 
 long gButtonDownTime = 0;
 
@@ -25,6 +25,8 @@ void setupDoor() {
 void processDoorCommand() {
 	  if (compareReceivedPayload("push")) {
 		  pushGarageDoorButton();
+	  } else if (compareReceivedPayload("get")) {
+		  sendGarageDoorStatus();
 	  } else {
 	    debug("Unknown DOOR command (use PUSH)");
 	  }
@@ -44,8 +46,7 @@ void tickDoors() {
 	if (lHallClosed != gHallClosed || lHallOpen != gHallOpen) {
 		gHallClosed = lHallClosed;
 		gHallOpen = lHallOpen;
-		int status = (gHallOpen ? 1 : 0) + (gHallClosed ? 2 : 0);
-		sendMessageInt(GDOOR_STATUS_TOPIC, status);
+		sendGarageDoorStatus();
 	}
 	if (gButtonDownTime != 0 && gButtonDownTime + PUSH_MS < millis()) {
 		digitalWrite(GDOORPIN, HIGH);
@@ -54,3 +55,14 @@ void tickDoors() {
 	}
 }
 
+void sendGarageDoorStatus() {
+	if (gHallOpen && gHallClosed) {
+		sendMessageString(GDOOR_STATUS_TOPIC, BETWEEN_STATUS_STRING);
+	} else if (!gHallOpen) {
+		sendMessageString(GDOOR_STATUS_TOPIC, OPEN_STATUS_STRING);
+	} else if (!gHallClosed) {
+		sendMessageString(GDOOR_STATUS_TOPIC, CLOSE_STATUS_STRING);
+	} else {
+		sendMessageString(GDOOR_STATUS_TOPIC, "ERROR");
+	}
+}

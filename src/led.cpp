@@ -30,9 +30,10 @@ void tickLed() {
 				gLedCurrentIntensity = gLedTargetIntensity;
 			}
 		}
-		debugInt("Setting current LED intensity to ", gLedCurrentIntensity);
+		//debugInt("Setting current LED intensity to ", gLedCurrentIntensity);
 		analogWrite(LEDPIN, gLedCurrentIntensity);
 		if (gLedCurrentIntensity == gLedTargetIntensity) {
+			debugInt("Current LED intensity set to ", gLedCurrentIntensity);
 			sendMessageInt(LED_CEIL_STATUS_TOPIC, gLedCurrentIntensity);
 		}
 	}
